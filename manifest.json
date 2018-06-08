@@ -1,0 +1,13 @@
+  {
+    "name": "Proxy",
+    "version": "1.0",
+    "description": "Simple proxy",
+    "permissions": ["storage","activeTab", "tabs","proxy"],
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+    },
+    "browser_action": {
+    },
+    "manifest_version": 2
+  }

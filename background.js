@@ -1,27 +1,33 @@
-
-var re = /(?:.+:\/\/)([^\/]*)(?:\/.*)?/;
+chrome.browserAction.setBadgeBackgroundColor({color: [0, 220, 0, 255]});
 
 chrome.tabs.onActivated.addListener(function (tabInfo) {
-    chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
-        var url = tabs[0].url;
-        console.log(url.match(re)[1]);
+    getCurrentTabHost((host) => {
+        hostInList(host, (inList) => {
+            setBadge(inList);
+        });
     });
 });
 
 chrome.browserAction.onClicked.addListener(function (tab) {
-
-    chrome.browserAction.setBadgeBackgroundColor({color: [0, 220, 0, 255]});
-    chrome.browserAction.getBadgeText({}, (value) => {
-        // chrome.proxy.settings.set({value: getProxyConfig(!!value), scope: 'regular'}, function () {});
-        // chrome.browserAction.setBadgeText(value ? {text: ""} : {text: " "});
-    })
-
+    getCurrentTabHost((host) => {
+        addOrRemoveHost(host, (action) => {
+            setBadge(action === "added");
+            setProxy();
+        })
+    });
 });
 
-function getProxyConfig(proxyDisabled, callback) {
-    if (proxyDisabled) {
-        return {mode:"direct"}
-    }
+function setBadge(enabled) {
+    chrome.browserAction.setBadgeText(enabled ? {text: " "} : {text: ""});
+}
+
+function setProxy() {
+    getProxyConfig((config) => {
+        chrome.proxy.settings.set({value: config, scope: 'regular'}, function () {});
+    })
+}
+
+function getProxyConfig(callback) {
     var proxySettingsNames = ["proxy.scheme", "proxy.host", "proxy.port"];
     getSettings(proxySettingsNames, function (settings) {
         proxySettingsNames.forEach((name) => {
@@ -30,29 +36,68 @@ function getProxyConfig(proxyDisabled, callback) {
             }
         });
         var config = {
-            mode: "fixed_servers",
-            rules: {
-                fallbackProxy: {
-                    scheme: settings["proxy.scheme"],
-                    host: settings["proxy.host"],
-                    port: settings["proxy.port"]
-                    // scheme: "socks5",
-                    // host: "192.168.56.1",
-                    // port: 9150
-                }
-            }
+            mode: "pac_script",
+            pacScript: {}
         };
-        callback(config);
+        var proxyType = "PROXY";
+        if (settings["proxy.scheme"].indexOf("socks") !== -1) {
+            proxyType = "SOCKS";
+        }
+        getSettings("hosts", function (items) {
+            var hosts = items.hosts || [];
+            var pacScript =
+                "function FindProxyForURL(url, host) {\n" +
+                "  if ([" + hosts.map((h) => { return "\"" + h + "\"" }).join(",") + "].indexOf(host) !== -1)\n" +
+                "    return '" + proxyType + " " + settings["proxy.host"] + ":" + settings["proxy.port"] + "';\n" +
+                "  return 'DIRECT';\n" +
+                "}";
+            config.pacScript.data = pacScript;
+            callback(config);
+        });
     })
 }
 
+function addOrRemoveHost(host, callback) {
+    getSettings("hosts", (items) => {
+        var hosts = items.hosts || [];
+        var i = hosts.indexOf(host);
+        if (i !== -1) {
+            hosts.splice(i, 1);
+        } else {
+            hosts.push(host);
+        }
+        saveSettings({"hosts": hosts}, function() {
+            callback(i !== -1 ? "removed" : "added");
+        })
+    })
+}
+
+function hostInList(host, callback) {
+    getSettings("hosts", function(items) {
+        var hosts = items.hosts || [];
+        callback(hosts.indexOf(host) !== -1);
+    });
+}
+
 function getSettings(names, callback) {
-    chrome.storage.local.get(/* String or Array */names, function (items) {
+    chrome.storage.local.get(names, function (items) {
         callback(items);
     });
 }
 
-function saveSettings(values, callback) {
-    
+function saveSettings(keyValue, callback) {
+    chrome.storage.local.set(keyValue, function () {
+        console.log("saved to storage: " + JSON.stringify(keyValue));
+        if (callback) {
+            callback();
+        }
+    });
 }
 
+function getCurrentTabHost(callback) {
+    var re = /(?:.+:\/\/)([^\/]*)(?:\/.*)?/;
+    chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
+        var url = tabs[0].url;
+        callback(url.match(re)[1]);
+    });
+}

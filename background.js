@@ -1,7 +1,15 @@
-chrome.browserAction.setBadgeBackgroundColor({color: [0, 220, 0, 255]});
+chrome.browserAction.setBadgeBackgroundColor({color: [0, 120, 255, 255]});
 
 chrome.tabs.onActivated.addListener(function (tabInfo) {
     getCurrentTabHost((host) => {
+        hostInList(host, (inList) => {
+            setBadge(inList);
+        });
+    });
+});
+
+chrome.tabs.onUpdated.addListener(function (tabId , info) {
+	getCurrentTabHost((host) => {
         hostInList(host, (inList) => {
             setBadge(inList);
         });
@@ -18,7 +26,7 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 });
 
 function setBadge(enabled) {
-    chrome.browserAction.setBadgeText(enabled ? {text: " "} : {text: ""});
+    chrome.browserAction.setBadgeText(enabled ? {text: "⛧"} : {text: ""});
 }
 
 function setProxy() {

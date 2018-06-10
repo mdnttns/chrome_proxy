@@ -1,5 +1,13 @@
 chrome.browserAction.setBadgeBackgroundColor({color: [0, 120, 255, 255]});
 
+chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+        if (request.id == "save_options") {
+            setProxy();
+        }
+    }
+);
+
 chrome.tabs.onActivated.addListener(function (tabInfo) {
     getCurrentTabHost((host) => {
         hostInList(host, (inList) => {

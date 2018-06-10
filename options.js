@@ -37,7 +37,11 @@ function save_options() {
     var optionsToSave = {};
     options.forEach(o => {
 		if (o.name === "hosts") {
-			optionsToSave[o.name] = o.el.value.split('\n').map(h => h.trim()).filter(h => h);
+			var hosts = o.el.value.split('\n').map(h => h.trim());
+			hosts = hosts.filter((h, i, self) => {
+				return h && self.indexOf(h) === i;
+			});
+			optionsToSave[o.name] = hosts;
 		} else {
 			optionsToSave[o.name] = o.el.value;
 		}

@@ -26,7 +26,7 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 });
 
 function setBadge(enabled) {
-    chrome.browserAction.setBadgeText(enabled ? {text: "⛧"} : {text: ""});
+    chrome.browserAction.setBadgeText(enabled ? {text: " "} : {text: ""});
 }
 
 function setProxy() {

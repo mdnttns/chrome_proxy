@@ -5,7 +5,9 @@ var options = [
         name: "proxy.port"
     }, {
         name: "proxy.scheme"
-    }
+    }, {
+		name: "hosts"
+	}
 ];
 
 function init() {
@@ -22,6 +24,9 @@ function restore_options() {
         options.forEach(o => {
             var value = items[o.name];
             if (value !== undefined) {
+				if (o.name === "hosts") {
+					value = value.join('\n');
+				}
                 o.el.value = value;
             }
         })
@@ -31,10 +36,14 @@ function restore_options() {
 function save_options() {
     var optionsToSave = {};
     options.forEach(o => {
-        optionsToSave[o.name] = o.el.value;
+		if (o.name === "hosts") {
+			optionsToSave[o.name] = o.el.value.split('\n').filter(h => h);
+		} else {
+			optionsToSave[o.name] = o.el.value;
+		}
     });
     chrome.storage.local.set(optionsToSave, function () {
-        sendMessage({id: "save_options"});
+		sendMessage({id: "save_options"});
     });
 }
 

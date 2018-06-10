@@ -31,6 +31,20 @@ input {
     padding: 3px;
     position: relative;
 }
-.button {
-    width: 100px;
+textarea {
+	height: 100px;
+	width: 70%;
+    border: 1px solid #000;
+    margin-top: 10px;
+    padding: 3px;
+    position: relative;
+}
+button {
+	height: 25px;
+    width: 120px;
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 16px;
+	margin-top: 10px;
+    padding: 3px;
+    position: relative;
 }

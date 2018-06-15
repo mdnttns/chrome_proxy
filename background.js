@@ -39,7 +39,8 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 });
 
 function setBadge(enabled) {
-    chrome.browserAction.setBadgeText(enabled ? {text: " "} : {text: ""});
+	chrome.browserAction.setIcon({path: enabled ? "icon2.png" : "icon1.png"});
+    //chrome.browserAction.setBadgeText(enabled ? {text: " "} : {text: ""});
 }
 
 function setProxy() {

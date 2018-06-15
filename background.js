@@ -1,3 +1,8 @@
+
+var urlRegexp = /(?:.+:\/\/)([^\/]*)(?:\/.*)?/;
+
+/////
+
 chrome.browserAction.setBadgeBackgroundColor({color: [0, 120, 255, 255]});
 
 chrome.runtime.onMessage.addListener(
@@ -111,9 +116,33 @@ function saveSettings(keyValue, callback) {
 }
 
 function getCurrentTabHost(callback) {
-    var re = /(?:.+:\/\/)([^\/]*)(?:\/.*)?/;
     chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
         var url = tabs[0].url;
-        callback(url.match(re)[1]);
+        callback(url.match(urlRegexp)[1]);
     });
 }
+
+
+////Context menu
+
+const properties = {
+    id: "proxy_context_menu",
+    title: "Add or remove host from proxy list",
+    contexts: ["link"]
+};
+
+chrome.contextMenus.onClicked.addListener(function(info, tab) {
+    if (info.menuItemId == "proxy_context_menu") {
+        console.log(JSON.stringify(info));
+        var host = info.linkUrl.match(urlRegexp)[1];
+        var pageHost = info.pageUrl.match(urlRegexp)[1];
+        addOrRemoveHost(host, (action) => {
+            setProxy();
+            if (host === pageHost) {
+                setBadge(action === "added")
+            }
+        });
+    }
+});
+
+chrome.contextMenus.create(properties, function () {});

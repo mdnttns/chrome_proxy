@@ -2,7 +2,7 @@
     "name": "Proxy",
     "version": "1.0",
     "description": "Simple proxy",
-    "permissions": ["storage","activeTab", "tabs","proxy"],
+    "permissions": ["storage","activeTab", "tabs","proxy", "contextMenus"],
     "background": {
       "scripts": ["background.js"],
       "persistent": false

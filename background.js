@@ -132,7 +132,7 @@ const properties = {
 };
 
 chrome.contextMenus.onClicked.addListener(function(info, tab) {
-    if (info.menuItemId == "proxy_context_menu") {
+    if (info.menuItemId === "proxy_context_menu") {
         var host = info.linkUrl.match(urlRegexp)[1];
         var pageHost = info.pageUrl.match(urlRegexp)[1];
         addOrRemoveHost(host, (action) => {
